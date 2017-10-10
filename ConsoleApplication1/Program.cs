@@ -16,12 +16,11 @@ namespace ConsoleApplication1
         static bool protecthtml = false;
         static void Main(string[] args)
         {
-            //测试：beifen 源目录 源根目录1 目标根目录1 ...
+            //测试：beifen 源目录 源根目录 目标根目录
 #if DEBUG
-            args = new string[3];
-            args[0] = @"F:\new_desktop\1";
-            args[1] = @"F:\new_desktop\1";
-            args[2] = @"F:\new_desktop\2";
+            args = new string[2];
+            args[0] = @"F:\pxp1230.github.io";
+            args[1] = @"pxp1230.github.io";
 #endif
             //检验参数是否正确
             int offset = 0;
@@ -33,21 +32,34 @@ namespace ConsoleApplication1
                     protecthtml = true;
                 }
             }
-            if ((args.Length - offset) >= 3 && (args.Length - offset) % 2 == 1)
+            string from = null, fromRoot = null, toRoot = null;
+            if ((args.Length - offset) == 2)
             {
-                DirectoryInfo from = new DirectoryInfo(args[0 + offset]);
-                int length = (args.Length - offset) / 2;
-                int i = 0;
-                for (; i < length; i++)
+                from = args[0 + offset];
+                fromRoot = args[0 + offset];
+                if (args[1 + offset].Length < 2 || args[1 + offset][1] != ':')
+                    toRoot = Environment.CurrentDirectory + @"\" + args[1 + offset];
+                else
+                    toRoot = args[1 + offset];
+            }
+            else if ((args.Length - offset) == 3)
+            {
+                from = args[0 + offset];
+                fromRoot = args[1 + offset];
+                if (args[2 + offset].Length < 2 || args[2 + offset][1] != ':')
+                    toRoot = Environment.CurrentDirectory + @"\" + args[2 + offset];
+                else
+                    toRoot = args[2 + offset];
+            }
+            if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(fromRoot) && !string.IsNullOrEmpty(toRoot))
+            {
+                DirectoryInfo fromDir = new DirectoryInfo(from);
+                if (fromDir.Exists && from.Substring(0, Math.Min(from.Length, fromRoot.Length)) == fromRoot)
                 {
-                    if (from.Exists && args[0 + offset].Substring(0, Math.Min(args[0 + offset].Length, args[2 * i + 1 + offset].Length)) == args[2 * i + 1 + offset])
-                    {
-                        DirectoryInfo to = new DirectoryInfo(args[2 * i + 2 + offset] + args[0 + offset].Substring(args[2 * i + 1 + offset].Length));
-                        CopyDirectory(from, to);
-                        break;
-                    }
+                    DirectoryInfo to = new DirectoryInfo(toRoot + from.Substring(fromRoot.Length));
+                    CopyDirectory(fromDir, to);
                 }
-                if (i == length)
+                else
                     Failed("失败：源目录必须在源根目录下！");
             }
             else
