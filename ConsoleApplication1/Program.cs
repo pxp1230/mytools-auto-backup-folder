@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -13,7 +13,6 @@ namespace ConsoleApplication1
 {
     class Program
     {
-        static bool protecthtml = false;
         static void Main(string[] args)
         {
             //测试：beifen 源目录 源根目录 目标根目录
@@ -26,10 +25,10 @@ namespace ConsoleApplication1
             int offset = 0;
             if (args.Length >= 1)
             {
-                if (args[0] == "-protecthtml")
+                //预留的参数位置
+                if (args[0] == "-XXX")
                 {
                     offset++;
-                    protecthtml = true;
                 }
             }
             string from = null, fromRoot = null, toRoot = null;
@@ -93,16 +92,6 @@ namespace ConsoleApplication1
                 allToFiles_names.Add(item.Name);
             }
 
-            List<string> allFromMarkdownFiles_names = new List<string>();
-            if (protecthtml)
-            {
-                FileInfo[] allFromMarkdownFiles = to.GetFiles("*.md");
-                foreach (FileInfo item in allFromMarkdownFiles)
-                {
-                    allFromMarkdownFiles_names.Add(item.Name);
-                }
-            }
-
             FileInfo[] allFromFiles = from.GetFiles();
             foreach (FileInfo item in allFromFiles)
             {
@@ -124,10 +113,7 @@ namespace ConsoleApplication1
 
             foreach (string item in allToFiles_names)
             {
-                if (!protecthtml || !((item == "index.html") || (item.EndsWith(".html") && File.Exists(to.FullName + "\\" + item.Substring(0, item.LastIndexOf('.')) + ".md"))))
-                {
-                    File.Delete(to.FullName + "\\" + item);
-                }
+                File.Delete(to.FullName + "\\" + item);
             }
 
 
@@ -142,7 +128,7 @@ namespace ConsoleApplication1
             foreach (DirectoryInfo item in allFromDirs)
             {
                 string dir = item.Name;
-                if (dir[0] == '.' || dir == "_git" || dir == "-git")
+                if (dir[0] == '.')
                     continue;
                 if (allToDirs_names.Contains(dir))
                 {
