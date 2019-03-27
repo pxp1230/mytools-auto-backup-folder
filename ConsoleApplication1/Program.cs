@@ -57,6 +57,7 @@ namespace ConsoleApplication1
                 {
                     DirectoryInfo to = new DirectoryInfo(toRoot + from.Substring(fromRoot.Length));
                     CopyDirectory(fromDir, to);
+                    Console.WriteLine("File_Copy_count: " + File_Copy_count);
                 }
                 else
                     Failed("失败：源目录必须在源根目录下！");
@@ -65,7 +66,7 @@ namespace ConsoleApplication1
             {
                 Failed("失败：参数不正确！");
             }
-            Exit();
+            //Exit();
         }
 
         static void Failed(string reason)
@@ -80,6 +81,7 @@ namespace ConsoleApplication1
             Process.GetCurrentProcess().Kill();
         }
 
+        static int File_Copy_count = 0;
         static void CopyDirectory(DirectoryInfo from, DirectoryInfo to)
         {
             if (!to.Exists)
@@ -100,14 +102,19 @@ namespace ConsoleApplication1
                 {
                     allToFiles_names.Remove(file);
                     FileInfo newFile = new FileInfo(to.FullName + "\\" + file);
-                    if (newFile.LastWriteTime < item.LastWriteTime)
+                    if (newFile.LastWriteTime != item.LastWriteTime || newFile.Length != item.Length)
                     {
-                        File.Copy(item.FullName, to.FullName + "\\" + file, true);
+                        File.Copy(item.FullName, newFile.FullName, true);
+                        newFile.LastWriteTime = item.LastWriteTime;
+                        File_Copy_count++;
                     }
                 }
                 else
                 {
-                    File.Copy(item.FullName, to.FullName + "\\" + file, true);
+                    FileInfo newFile = new FileInfo(to.FullName + "\\" + file);
+                    File.Copy(item.FullName, newFile.FullName, true);
+                    newFile.LastWriteTime = item.LastWriteTime;
+                    File_Copy_count++;
                 }
             }
 
